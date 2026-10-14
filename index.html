@@ -1,1 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Classificador de Moedas</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #1e1e2f; color: #fff; padding: 20px; text-align: center; }
+    .card { background: #2d2d44; padding: 20px; margin: 15px auto; max-width: 400px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+    h1 { color: #00d2ff; }
+    .status { font-weight: bold; color: #4caf50; }
+    ul { list-style: none; padding: 0; }
+    li { background: #3b3b58; margin: 5px 0; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
 
+  <h1>🪙 Dashboard de Deteção de Moedas</h1>
+  <p>Status MQTT: <span id="status" class="status">A conectar...</span></p>
+
+  <div class="card">
+    <h2>Última Deteção</h2>
+    <div id="deteccoes">Nenhuma moeda detetada ainda.</div>
+  </div>
+
+  <script>
+    // Conectar ao Broker HiveMQ via WebSocket
+    const client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
+
+    client.on('connect', () => {
+      document.getElementById('status').innerText = 'Conectado!';
+      client.subscribe('moedas/deteccao/sala_de_aula');
+    });
+
+    client.on('message', (topic, message) => {
+      const data = JSON.parse(message.toString());
+      let html = '<ul>';
+      data.moedas.forEach(m => {
+        html += `<li><strong>${m.classe}</strong> (Confiança: ${(m.confianca * 100).toFixed(0)}%)</li>`;
+      });
+      html += '</ul>';
+      document.getElementById('deteccoes').innerHTML = html;
+    });
+  </script>
+</body>
+</html>
