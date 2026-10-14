@@ -1,0 +1,1 @@
+# detector_moedas_mqtt.py
